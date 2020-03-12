@@ -73,9 +73,14 @@ public class BookApiController implements BookApi {
 	@Override
 	public ResponseEntity<String> orderBook(String isbn, Book book) {
 		
-			BookQuantity updatedBookQuantity = bookService.updateBookQuantity(isbn);
-		 
-		String message = MessageFormat.format("Order for \"{0}\" has been processed successfully", updatedBookQuantity.getIsbn());
+		Optional<Book> bookOptional = bookService.getByISBN(isbn);
+		if(!bookOptional.isPresent()){
+			return new ResponseEntity(new ResponseMessage("No matching book found with isbn: "+ isbn, HttpStatus.NOT_FOUND.name()),
+					HttpStatus.NOT_FOUND);
+			
+		}
+		bookService.updateBookQuantity(isbn);
+		String message = MessageFormat.format("Order for \"{0}\" has been processed successfully",bookOptional.get().getTitle());
 		return new ResponseEntity<String>(message, HttpStatus.OK);
 	}
 

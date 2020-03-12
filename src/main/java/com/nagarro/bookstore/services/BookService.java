@@ -69,8 +69,8 @@ public interface BookService {
 	 *
 	 * @param isbn
 	 *            the isbn of book
-	 * @return the updated book quantity object
+	 * 
 	 */
-	public BookQuantity updateBookQuantity(String isbn);
+	public void updateBookQuantity(String isbn);
 
 }

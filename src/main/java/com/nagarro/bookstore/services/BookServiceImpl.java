@@ -159,30 +159,27 @@ public class BookServiceImpl implements BookService {
 	 * String)
 	 */
 	@Override
-	@Transactional( propagation = Propagation.REQUIRES_NEW , isolation = Isolation.REPEATABLE_READ)
-	public BookQuantity updateBookQuantity(String isbn) {
+	@Transactional( propagation = Propagation.REQUIRES_NEW , isolation = Isolation.READ_COMMITTED)
+	public void updateBookQuantity(String isbn) {
 
-		BookQuantity bookQuantity = null;
+		int updateQuantityForIsbn = bookQuantityRepository.updateQuantityForIsbn(isbn);
+		LOGGER.info("just after update query" + Thread.currentThread().getId());
+		try {
+			LOGGER.info("threadname on hold= " + Thread.currentThread().getId());
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		LOGGER.info("threadname resumed = " + Thread.currentThread().getId());
 
-		Optional<BookQuantity> bookRecord = bookQuantityRepository.findById(isbn);
-		
-
-		if (bookRecord.isPresent()) {
-			bookQuantity = bookRecord.get();
-			LOGGER.info("book count == " + Thread.currentThread().getId() + "  " + bookQuantity.getQuantity());
-
-			if (bookQuantity.getQuantity() > 0) {
-				bookQuantity = bookRecord.get();
-				bookQuantity.setQuantity(bookRecord.get().getQuantity() - 1);
-				bookQuantityRepository.save(bookQuantity);
+			if (updateQuantityForIsbn > 0) {
+				
 			} else {
 				String message = MessageFormat.format(
-						"Processing failed : We could not process your order as the \" {0} \" is out of stock.",
-						bookQuantity.getIsbn());
-				throw new BookStoreException(new ResponseMessage(message, "order.failed"));
+						"Processing failed : We could not process your order as bookIsbn: {0} is out of stock.",
+						isbn);
+				throw new BookStoreException(new ResponseMessage(message, "book.out.of.stock"));
 			}
-		}
-
-		return bookQuantity;
 	}
 }
