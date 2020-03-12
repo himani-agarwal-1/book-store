@@ -7,6 +7,7 @@ To implement Rest API, following have been used :
 3. Mysql database for storing and managing the RD
 4. Swagger.io for API documentation
 
+# Entity-Relational Diagram
 ![](images/erdiagram.png)
 
 # STEPS TO INSTALL
