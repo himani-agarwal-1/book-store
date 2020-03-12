@@ -53,7 +53,8 @@ DROP TABLE IF EXISTS `book_quantity`;
 CREATE TABLE `book_quantity` (
   `isbn` varchar(50) NOT NULL,
   `quantity` int NOT NULL,
-  PRIMARY KEY (`isbn`)
+  PRIMARY KEY (`isbn`),
+  CONSTRAINT `fk1111` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
