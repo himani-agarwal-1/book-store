@@ -163,15 +163,15 @@ public class BookServiceImpl implements BookService {
 	public void updateBookQuantity(String isbn) {
 
 		int updateQuantityForIsbn = bookQuantityRepository.updateQuantityForIsbn(isbn);
-		LOGGER.info("just after update query" + Thread.currentThread().getId());
+		LOGGER.info("just after update query for isbn " + isbn + "  ...  " + Thread.currentThread().getId());
 		try {
-			LOGGER.info("threadname on hold= " + Thread.currentThread().getId());
+			LOGGER.info("threadname on hold= " + isbn + "  ...  "  + Thread.currentThread().getId());
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		LOGGER.info("threadname resumed = " + Thread.currentThread().getId());
+		LOGGER.info("threadname resumed = "  + isbn + "  ...  " + Thread.currentThread().getId());
 
 			if (updateQuantityForIsbn > 0) {
 				

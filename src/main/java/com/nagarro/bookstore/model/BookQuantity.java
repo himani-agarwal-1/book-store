@@ -14,7 +14,7 @@ public class BookQuantity {
 	private String isbn;
 
 	@NotNull
-	private Integer quantity = 0;
+	private Integer quantity;
 
 	public String getIsbn() {
 		return isbn;

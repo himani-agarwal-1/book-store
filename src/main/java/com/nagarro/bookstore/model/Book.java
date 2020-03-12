@@ -41,27 +41,15 @@ public class Book {
 
 	private String publishedBy = null;
 
-	private Integer quantity = 0;
 
 	private float price = 0;
 	private String language;
 	private String bindingType;
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@PrimaryKeyJoinColumn
 	@JsonIgnore
 	private BookQuantity bookQuantity;
-
-	@ApiModelProperty(value = "")
-	@JsonProperty("quantity")
-
-	public Integer getQuantity() {
-		return quantity;
-	}
-
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
-	}
 
 	@ApiModelProperty(value = "")
 	@JsonProperty("isbn")

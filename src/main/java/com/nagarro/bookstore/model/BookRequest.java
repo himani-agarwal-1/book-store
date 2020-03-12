@@ -17,7 +17,8 @@ public class BookRequest {
 	private String publishedBy;
 
 	private Float price = 0f;
-	private Integer quantity = 0;
+	@NotNull
+	private Integer quantity;
 	private String language;
 	private String bindingType;
 
