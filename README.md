@@ -1,4 +1,4 @@
-# book-store
+# Book Store
 Book store web service responsible for managing and ordering books online 
 
 To implement Rest API, following have been used : 
@@ -7,7 +7,7 @@ To implement Rest API, following have been used :
 3. Mysql database for storing and managing the RD
 4. Swagger.io for API documentation
 
-
+![](images/erdiagram.png)
 
 # STEPS TO INSTALL
 
