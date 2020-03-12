@@ -1,4 +1,4 @@
-# book-store
+# Book Store
 Book store web service responsible for managing and ordering books online 
 
 To implement Rest API, following have been used : 
