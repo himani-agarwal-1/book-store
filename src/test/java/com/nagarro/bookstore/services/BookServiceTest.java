@@ -172,5 +172,42 @@ public class BookServiceTest {
 		Assert.assertFalse(response.isPresent());
 
 	}
+	
+	@Test
+	public void testUpdateSuccess() {
+
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setTitle("title");
+		bookRequest.setQuantity(10);
+
+		book.setTitle(bookRequest.getTitle());
+
+		Mockito.when(bookRepository.save(Mockito.any(Book.class))).thenReturn(book);
+		BookQuantity bookQuantity = new BookQuantity();
+		bookQuantity.setIsbn(book.getIsbn());
+		bookQuantity.setQuantity(10);
+		Mockito.when(bookQuantityRepository.findById(Mockito.anyString())).thenReturn(Optional.of(bookQuantity));
+		Mockito.when(bookQuantityRepository.save(Mockito.any(BookQuantity.class))).thenReturn(bookQuantity);
+
+		Book response = bookService.update(bookRequest,book);
+		Assert.assertNotNull(response);
+		Assert.assertNotNull(book.getIsbn());
+		Assert.assertEquals(bookRequest.getTitle(), response.getTitle());
+	}
+
+	
+	@Test(expected = BookStoreException.class)
+	public void testUpdateQuantityWhenBookOutOfStock() {
+		BookQuantity bookQuantity = new BookQuantity();
+		bookQuantity.setIsbn(book.getIsbn());
+		bookQuantity.setQuantity(0);
+		
+		
+		Mockito.when(bookQuantityRepository.findById(Mockito.anyString())).thenReturn(Optional.of(bookQuantity));
+		bookService.updateBookQuantity("isbn");
+		
+	}
+	
+	
 
 }
