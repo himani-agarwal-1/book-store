@@ -3,8 +3,7 @@ package com.nagarro.bookstore.services;
 import java.util.List;
 import java.util.Optional;
 
-import com.nagarro.bookstore.model.Book;
-import com.nagarro.bookstore.model.BookQuantity;
+import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.model.BookRequest;
 
 /**
@@ -72,5 +71,14 @@ public interface BookService {
 	 * 
 	 */
 	public void updateBookQuantity(String isbn);
+
+	/**
+	 * Updates the book record.
+	 *
+	 * @param bookRequest the book request
+	 * @param book the book record
+	 * @return the updated book record
+	 */
+	Book update(BookRequest bookRequest,  Book book);
 
 }

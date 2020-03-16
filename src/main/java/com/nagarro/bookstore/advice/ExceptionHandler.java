@@ -1,4 +1,4 @@
-package com.nagarro.bookstore.controller;
+package com.nagarro.bookstore.advice;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.client.RestClientException;
@@ -22,6 +23,14 @@ public class ExceptionHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExceptionHandler.class);
 
+	
+	@org.springframework.web.bind.annotation.ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+	public ResponseEntity<ResponseMessage> handleObjectOptimisticLockingFailureException(HttpServletRequest request,
+			ObjectOptimisticLockingFailureException ex) {
+		logger.error("ObjectOptimisticLockingFailureException exception occured " + request.getRequestURI(), ex);
+		ResponseMessage responseMessage = new ResponseMessage("Operation failed due to conflict with concurrent operations. Please try again after sometime. ", HttpStatus.INTERNAL_SERVER_ERROR.name());
+		return new ResponseEntity<ResponseMessage>(responseMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 	/**
 	 * Handles MethodArgumentNotValidException
 	 *

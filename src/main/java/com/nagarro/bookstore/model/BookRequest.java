@@ -3,7 +3,8 @@ package com.nagarro.bookstore.model;
 import javax.validation.constraints.NotNull;
 
 /**
- * The Class BookRequest. Models Input JSON for add book request.
+ * @author himaniagarwal The Class BookRequest. Models Input JSON for add book
+ *         request.
  * 
  */
 public class BookRequest {

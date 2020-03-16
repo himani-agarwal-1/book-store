@@ -14,14 +14,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.nagarro.bookstore.entity.Book;
+import com.nagarro.bookstore.entity.BookQuantity;
 import com.nagarro.bookstore.exception.BookStoreException;
-import com.nagarro.bookstore.model.Book;
-import com.nagarro.bookstore.model.BookQuantity;
 import com.nagarro.bookstore.model.BookRequest;
 import com.nagarro.bookstore.model.ResponseMessage;
 import com.nagarro.bookstore.repositories.BookQuantityRepository;
@@ -146,7 +143,7 @@ public class BookServiceImpl implements BookService {
 	 */
 	@Override
 	public Optional<Book> getByISBN(String isbn) {
-		
+
 		Optional<Book> book = bookRepository.findById(isbn);
 		return book;
 	}
@@ -159,27 +156,55 @@ public class BookServiceImpl implements BookService {
 	 * String)
 	 */
 	@Override
-	@Transactional( propagation = Propagation.REQUIRES_NEW , isolation = Isolation.READ_COMMITTED)
 	public void updateBookQuantity(String isbn) {
 
-		int updateQuantityForIsbn = bookQuantityRepository.updateQuantityForIsbn(isbn);
 		LOGGER.info("just after update query for isbn " + isbn + "  ...  " + Thread.currentThread().getId());
 		try {
-			LOGGER.info("threadname on hold= " + isbn + "  ...  "  + Thread.currentThread().getId());
+			LOGGER.info("threadname on hold= " + isbn + "  ...  " + Thread.currentThread().getId());
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		LOGGER.info("threadname resumed = "  + isbn + "  ...  " + Thread.currentThread().getId());
-
-			if (updateQuantityForIsbn > 0) {
-				
+		
+		LOGGER.info("threadname resumed = " + isbn + "  ...  " + Thread.currentThread().getId());
+		Optional<BookQuantity> bookQuantityOptional = bookQuantityRepository.findById(isbn);
+		if (bookQuantityOptional.isPresent()) {
+			BookQuantity currentBookQuantity = bookQuantityOptional.get();
+			if (currentBookQuantity.getQuantity() > 0) {
+				Integer updatedQuantity = currentBookQuantity.getQuantity() - 1;
+				LOGGER.info("currentBookQuantity.getQuantity() = " + currentBookQuantity.getQuantity());
+				currentBookQuantity.setQuantity(updatedQuantity);
+				bookQuantityRepository.save(currentBookQuantity);
 			} else {
 				String message = MessageFormat.format(
-						"Processing failed : We could not process your order as bookIsbn: {0} is out of stock.",
-						isbn);
+						"Processing failed : We could not process your order as bookIsbn: {0} is out of stock.", isbn);
 				throw new BookStoreException(new ResponseMessage(message, "book.out.of.stock"));
 			}
+		}
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.nagarro.bookstore.services.BookService#update(com.nagarro.bookstore.
+	 * model.BookRequest, com.nagarro.bookstore.entity.Book)
+	 */
+	@Override
+	public Book update(BookRequest bookRequest, Book book) {
+
+		BeanUtils.copyProperties(bookRequest, book);
+		book = bookRepository.save(book);
+
+		Optional<BookQuantity> bookQuanityOptional = bookQuantityRepository.findById(book.getIsbn());
+		if (bookQuanityOptional.isPresent()) {
+			BookQuantity bookQuantity = bookQuanityOptional.get();
+			bookQuantity.setQuantity(bookRequest.getQuantity());
+			bookQuantityRepository.save(bookQuantity);
+			LOGGER.info("Book quantity updated for isbn : " + book.getIsbn() + " updated quantity :   "
+					+ bookQuantity.getQuantity());
+		}
+		return book;
 	}
 }

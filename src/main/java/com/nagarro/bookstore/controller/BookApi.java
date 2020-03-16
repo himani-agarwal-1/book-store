@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.nagarro.bookstore.model.Book;
+import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.model.BookRequest;
 
 import io.swagger.annotations.Api;
@@ -83,5 +83,14 @@ public interface BookApi {
 	ResponseEntity<String> orderBook(
 			@ApiParam(value = "isbn of book to be ordered", required = true) @PathVariable("isbn") String isbn,
 			@ApiParam(value = "book object to be ordered", required = true) @Valid @RequestBody Book body);
+	
+	@ApiOperation(value = "update book", nickname = "updateBook", notes = "update a book", tags = { "bookstore", })
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "Invalid book isbn"),
+			@ApiResponse(code = 404, message = "book not found"),
+			@ApiResponse(code = 500, message = "failed operation") })
+	@RequestMapping(value = "book/{isbn}", produces = { "application/json" }, method = RequestMethod.PUT)
+	ResponseEntity<Book> updateBook(
+			@ApiParam(value = "isbn of book", required = true) @PathVariable("isbn") String isbn,
+			@ApiParam(value = "book object to be updated", required = true) @Valid @RequestBody BookRequest bookRequest);
 
 }

@@ -1,4 +1,4 @@
-package com.nagarro.bookstore.model;
+package com.nagarro.bookstore.entity;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -41,7 +42,6 @@ public class Book {
 
 	private String publishedBy = null;
 
-
 	private float price = 0;
 	private String language;
 	private String bindingType;
@@ -50,6 +50,9 @@ public class Book {
 	@PrimaryKeyJoinColumn
 	@JsonIgnore
 	private BookQuantity bookQuantity;
+
+	@Version
+	private Integer version;
 
 	@ApiModelProperty(value = "")
 	@JsonProperty("isbn")
@@ -144,6 +147,15 @@ public class Book {
 
 	public void setBookQuantity(BookQuantity bookQuantity) {
 		this.bookQuantity = bookQuantity;
+	}
+
+	@JsonIgnore
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 
 }

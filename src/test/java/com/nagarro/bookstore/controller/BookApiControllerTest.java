@@ -24,8 +24,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nagarro.bookstore.controller.BookApiController;
+import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.exception.BookStoreException;
-import com.nagarro.bookstore.model.Book;
 import com.nagarro.bookstore.model.BookRequest;
 import com.nagarro.bookstore.services.BookService;
 @RunWith(SpringRunner.class)

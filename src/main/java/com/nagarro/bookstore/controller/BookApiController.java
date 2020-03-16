@@ -16,12 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.nagarro.bookstore.model.Book;
-import com.nagarro.bookstore.model.BookQuantity;
+import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.model.BookRequest;
 import com.nagarro.bookstore.model.ResponseMessage;
 import com.nagarro.bookstore.services.BookService;
-import com.nagarro.bookstore.services.BookServiceImpl;
 
 /**
  * @author himaniagarwal Book Controller handles book API calls
@@ -72,15 +70,17 @@ public class BookApiController implements BookApi {
 
 	@Override
 	public ResponseEntity<String> orderBook(String isbn, Book book) {
-		
+
 		Optional<Book> bookOptional = bookService.getByISBN(isbn);
-		if(!bookOptional.isPresent()){
-			return new ResponseEntity(new ResponseMessage("No matching book found with isbn: "+ isbn, HttpStatus.NOT_FOUND.name()),
+		if (!bookOptional.isPresent()) {
+			return new ResponseEntity(
+					new ResponseMessage("No matching book found with isbn: " + isbn, HttpStatus.NOT_FOUND.name()),
 					HttpStatus.NOT_FOUND);
-			
+
 		}
 		bookService.updateBookQuantity(isbn);
-		String message = MessageFormat.format("Order for \"{0}\" has been processed successfully",bookOptional.get().getTitle());
+		String message = MessageFormat.format("Order for \"{0}\" has been processed successfully",
+				bookOptional.get().getTitle());
 		return new ResponseEntity<String>(message, HttpStatus.OK);
 	}
 
@@ -89,6 +89,17 @@ public class BookApiController implements BookApi {
 		List<String> mediaCoverage = bookService.getMediaCoverageForBook(booktTitle);
 		mediaCoverage = null != mediaCoverage ? mediaCoverage : new ArrayList<>(0);
 		return new ResponseEntity<List<String>>(mediaCoverage, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Book> updateBook(String isbn, @Valid BookRequest bookRequest) {
+		Optional<Book> bookByISBN = bookService.getByISBN(isbn);
+		if (!bookByISBN.isPresent()) {
+			return new ResponseEntity(new ResponseMessage("Invalid ISBN provided", HttpStatus.NOT_FOUND.name()),
+					HttpStatus.NOT_FOUND);
+		}
+		Book book = bookService.update(bookRequest, bookByISBN.get());
+		return new ResponseEntity<>(book, HttpStatus.OK);
 	}
 
 }

@@ -1,8 +1,9 @@
-package com.nagarro.bookstore.model;
+package com.nagarro.bookstore.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -12,11 +13,14 @@ import javax.validation.constraints.NotNull;
 public class BookQuantity {
 
 	@Id
-	@Column(length=50)
+	@Column(length = 50)
 	private String isbn;
 
 	@NotNull
 	private Integer quantity;
+
+	@Version
+	private Integer version;
 
 	public String getIsbn() {
 		return isbn;
@@ -32,6 +36,14 @@ public class BookQuantity {
 
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 
 }

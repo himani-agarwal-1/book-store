@@ -22,9 +22,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+import com.nagarro.bookstore.entity.Book;
+import com.nagarro.bookstore.entity.BookQuantity;
 import com.nagarro.bookstore.exception.BookStoreException;
-import com.nagarro.bookstore.model.Book;
-import com.nagarro.bookstore.model.BookQuantity;
 import com.nagarro.bookstore.model.BookRequest;
 import com.nagarro.bookstore.repositories.BookQuantityRepository;
 import com.nagarro.bookstore.repositories.BookRepository;

@@ -1,4 +1,4 @@
-package com.nagarro.bookstore.configuration;
+package com.nagarro.bookstore.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

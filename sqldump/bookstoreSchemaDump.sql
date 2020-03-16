@@ -31,6 +31,7 @@ CREATE TABLE `book` (
   `price` float NOT NULL,
   `published_by` varchar(255) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
+   `version` int DEFAULT NULL,
   PRIMARY KEY (`isbn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -53,6 +54,7 @@ DROP TABLE IF EXISTS `book_quantity`;
 CREATE TABLE `book_quantity` (
   `isbn` varchar(50) NOT NULL,
   `quantity` int NOT NULL,
+   `version` int DEFAULT NULL,
   PRIMARY KEY (`isbn`),
   CONSTRAINT `fk1111` FOREIGN KEY (`isbn`) REFERENCES `book` (`isbn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
