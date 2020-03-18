@@ -10,17 +10,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 
 import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.entity.BookQuantity;
@@ -150,6 +145,21 @@ public class BookServiceTest {
 		Assert.assertNotNull(responses);
 		Assert.assertEquals(0, responses.size());
 	}
+	
+	@Test(expected =RestClientException.class)
+	public void testGetMediaCoverageForBookWhenRestClientExceptionIsThrown() {
+
+		List<Map<String, Object>> mediaList = new ArrayList<>();
+		Map<String, Object> map = new HashMap<>();
+		map.put("title", "title");
+		map.put("body", "body");
+		map.put("id", 1);
+		mediaList.add(map);
+		String title = "t";
+		Mockito.when(restClientUtil.getAllMediaCoverage())
+				.thenThrow(RestClientException.class);
+		bookService.getMediaCoverageForBook(title);
+	}
 
 	@Test
 	public void testGetByISBN() {
@@ -195,6 +205,25 @@ public class BookServiceTest {
 		Assert.assertNotNull(response);
 		Assert.assertNotNull(book.getIsbn());
 		Assert.assertEquals(bookRequest.getTitle(), response.getTitle());
+	}
+
+	@Test
+	public void testUpdateQuantitySuccess() {
+
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setTitle("title");
+		bookRequest.setQuantity(10);
+
+		book.setTitle(bookRequest.getTitle());
+		BookQuantity bookQuantity = new BookQuantity();
+		bookQuantity.setIsbn(book.getIsbn());
+		bookQuantity.setQuantity(11);
+		Mockito.when(bookQuantityRepository.findById(Mockito.anyString())).thenReturn(Optional.of(bookQuantity));
+		Mockito.when(bookQuantityRepository.save(Mockito.any(BookQuantity.class))).thenReturn(bookQuantity);
+
+		String isbn = "isbn";
+		bookService.updateBookQuantity(isbn );
+		
 	}
 
 	
