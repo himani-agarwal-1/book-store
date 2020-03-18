@@ -48,7 +48,7 @@ public class Book {
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@PrimaryKeyJoinColumn
-	@JsonIgnore
+	
 	private BookQuantity bookQuantity;
 
 	@Version

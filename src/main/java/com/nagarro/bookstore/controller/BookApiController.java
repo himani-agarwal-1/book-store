@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.nagarro.bookstore.constant.Constants;
 import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.model.BookRequest;
+import com.nagarro.bookstore.model.OrderResponse;
 import com.nagarro.bookstore.model.ResponseMessage;
 import com.nagarro.bookstore.services.BookService;
 
@@ -46,12 +48,12 @@ public class BookApiController implements BookApi {
 	}
 
 	@Override
-	public ResponseEntity<List<Book>> findBooksByQuery(@RequestParam(name = "title", required = false) String title,
-			@RequestParam(name = "author", required = false) String author,
-			@RequestParam(name = "isbn", required = false) String isbn) {
+	public ResponseEntity<List<Book>> findBooksByQuery(@RequestParam(name = Constants.TITLE, required = false) String title,
+			@RequestParam(name = Constants.AUTHOR, required = false) String author,
+			@RequestParam(name = Constants.ISBN, required = false) String isbn) {
 		List<Book> books = bookService.findByQuery(author, isbn, title);
 		if (null == books || books.isEmpty()) {
-			return new ResponseEntity(new ResponseMessage(" No match found", HttpStatus.NOT_FOUND.name()),
+			return new ResponseEntity(new ResponseMessage(Constants.NOT_FOUND_MESSAGE, HttpStatus.NOT_FOUND.name()),
 					HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<List<Book>>(books, HttpStatus.OK);
@@ -61,7 +63,7 @@ public class BookApiController implements BookApi {
 	public ResponseEntity<Book> getBookByIsbn(String isbn) {
 		Optional<Book> bookOptional = bookService.getByISBN(isbn);
 		if (!bookOptional.isPresent()) {
-			return new ResponseEntity(new ResponseMessage(" No match found", HttpStatus.NOT_FOUND.name()),
+			return new ResponseEntity(new ResponseMessage(Constants.NOT_FOUND_MESSAGE, HttpStatus.NOT_FOUND.name()),
 					HttpStatus.NOT_FOUND);
 		}
 		Book bookRecord = bookOptional.get();
@@ -69,19 +71,21 @@ public class BookApiController implements BookApi {
 	}
 
 	@Override
-	public ResponseEntity<String> orderBook(String isbn, Book book) {
+	public ResponseEntity<OrderResponse> orderBook(String isbn, Book book) {
 
 		Optional<Book> bookOptional = bookService.getByISBN(isbn);
 		if (!bookOptional.isPresent()) {
 			return new ResponseEntity(
-					new ResponseMessage("No matching book found with isbn: " + isbn, HttpStatus.NOT_FOUND.name()),
+					new ResponseMessage(Constants.NOT_FOUND_MESSAGE + isbn, HttpStatus.NOT_FOUND.name()),
 					HttpStatus.NOT_FOUND);
 
 		}
 		bookService.updateBookQuantity(isbn);
-		String message = MessageFormat.format("Order for \"{0}\" has been processed successfully",
-				bookOptional.get().getTitle());
-		return new ResponseEntity<String>(message, HttpStatus.OK);
+		OrderResponse orderResponse = new OrderResponse();
+		orderResponse.setTitle(bookOptional.get().getTitle());
+		orderResponse.setMessage(MessageFormat.format(Constants.ORDER_SUCCESSFULL_MESSAGE,
+				bookOptional.get().getTitle()));
+		return new ResponseEntity<OrderResponse>(orderResponse, HttpStatus.OK);
 	}
 
 	@Override
@@ -95,7 +99,7 @@ public class BookApiController implements BookApi {
 	public ResponseEntity<Book> updateBook(String isbn, @Valid BookRequest bookRequest) {
 		Optional<Book> bookByISBN = bookService.getByISBN(isbn);
 		if (!bookByISBN.isPresent()) {
-			return new ResponseEntity(new ResponseMessage("Invalid ISBN provided", HttpStatus.NOT_FOUND.name()),
+			return new ResponseEntity(new ResponseMessage(Constants.NOT_FOUND_MESSAGE, HttpStatus.NOT_FOUND.name()),
 					HttpStatus.NOT_FOUND);
 		}
 		Book book = bookService.update(bookRequest, bookByISBN.get());
