@@ -46,7 +46,7 @@ public class Book {
 	private String language;
 	private String bindingType;
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	@PrimaryKeyJoinColumn
 	
 	private BookQuantity bookQuantity;

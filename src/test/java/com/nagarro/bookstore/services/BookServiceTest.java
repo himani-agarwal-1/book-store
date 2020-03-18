@@ -93,8 +93,10 @@ public class BookServiceTest {
 	@Test
 	public void testDeleteSuccess() {
 
-		Mockito.doNothing().when(bookRepository).delete(Mockito.any(Book.class));
+		Optional<Book> bookOptional = Optional.of(book);
 		String isbn = "isbn";
+		Mockito.when(bookRepository.findById(isbn)).thenReturn(bookOptional);
+		Mockito.doNothing().when(bookRepository).delete(Mockito.any(Book.class));
 		bookService.delete(isbn);
 	}
 
