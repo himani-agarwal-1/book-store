@@ -11,7 +11,10 @@ To implement Rest API, following have been used :
 ![](images/erdiagram.png)
 
 # STEPS TO RUN APPLICATION WITH DOCKER
-1. On the project base directory, run following command : 
+1. On the project base directory, run following commands : 
+````
+mvn clean install
+````
 ````
 docker-compose up
 ````
