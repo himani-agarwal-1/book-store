@@ -18,7 +18,7 @@ docker-compose up --build
 ````
 It will run the following 2 services : 
 1. docker-mysql : A container running MySql server available on 3306
-2. book-store-app : A container runnig the spring boot application on 8080
+2. book-store-app : A container running the spring boot application on 8080
 
 
 # STEPS TO RUN APPLICATION MANUALLY( Without DOCKER)
