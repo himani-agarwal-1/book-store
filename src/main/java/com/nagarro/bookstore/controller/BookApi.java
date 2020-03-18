@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.nagarro.bookstore.constant.Constants;
 import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.model.BookRequest;
+import com.nagarro.bookstore.model.OrderResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,71 +28,73 @@ import io.swagger.annotations.ApiResponses;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-03-05T04:48:53.265Z")
 
-@Api(value = "bookstore", description = "the bookstore API")
+@Api(value = Constants.BOOKSTORE, description = "the bookstore API")
 public interface BookApi {
 
-	@ApiOperation(value = "Add a new book to the store", nickname = "addBook", notes = "", tags = { "bookstore", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "successfully created", response = Book.class),
-			@ApiResponse(code = 500, message = "failed operation"),
-			@ApiResponse(code = 400, message = "Invalid input") })
-	@RequestMapping(value = "/book", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.POST)
+	@ApiOperation(value = "Adds a new book to the store", nickname = "addBook", notes = "", tags = {
+			Constants.BOOKSTORE })
+	@ApiResponses(value = { @ApiResponse(code = 201, message = Constants.SUCCESSFUL_OPERATION, response = Book.class),
+			@ApiResponse(code = 500, message = Constants.FAILED_OPERATION),
+			@ApiResponse(code = 400, message = Constants.INVALID_INPUT) })
+	@RequestMapping(value = "/book", produces = { Constants.APPLICATION_JSON }, consumes = {
+			Constants.APPLICATION_JSON }, method = RequestMethod.POST)
 	ResponseEntity<Book> addBook(
 			@ApiParam(value = "Book object that needs to be added to the store", required = true) @Valid @RequestBody BookRequest body);
 
-	@ApiOperation(value = "Delete book", nickname = "deleteBook", notes = "", tags = { "bookstore", })
+	@ApiOperation(value = "Deletes book", nickname = "deleteBook", notes = "", tags = { Constants.BOOKSTORE })
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "successfully deleted"),
-			@ApiResponse(code = 500, message = "Invalid book supplied") })
-	@RequestMapping(value = "/book/{isbn}", produces = { "application/json" }, method = RequestMethod.DELETE)
+			@ApiResponse(code = 500, message = Constants.INVALID_ISBN_PROVIDED) })
+	@RequestMapping(value = "/book/{isbn}", produces = { Constants.APPLICATION_JSON }, method = RequestMethod.DELETE)
 	ResponseEntity<Void> deleteBook(
-			@ApiParam(value = "The book id that needs to be deleted", required = true) @PathVariable("isbn") String isbn);
+			@ApiParam(value = "The book id that needs to be deleted", required = true) @PathVariable(Constants.ISBN) String isbn);
 
 	@ApiOperation(value = "Finds Books by isbn, title or author", nickname = "findBooksByQuery", notes = "Any combination of three parameters can be provided.", response = Book.class, responseContainer = "List", tags = {
-			"bookstore", })
+			Constants.BOOKSTORE })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "successful operation", response = Book.class, responseContainer = "List"),
-			@ApiResponse(code = 400, message = "Invalid parameter value"),
-			@ApiResponse(code = 500, message = "failed operation") })
-	@RequestMapping(value = "/books", produces = { "application/json" }, method = RequestMethod.GET)
+			@ApiResponse(code = 200, message = Constants.SUCCESSFUL_OPERATION, response = Book.class, responseContainer = "List"),
+			@ApiResponse(code = 500, message = Constants.FAILED_OPERATION) })
+	@RequestMapping(value = "/books", produces = { Constants.APPLICATION_JSON }, method = RequestMethod.GET)
 	ResponseEntity<List<Book>> findBooksByQuery(
-			@ApiParam(value = "book title to be found") @Valid @RequestParam(value = "title", required = false) String title,
-			@ApiParam(value = "author name") @Valid @RequestParam(value = "author", required = false) String author,
-			@ApiParam(value = "isbn number") @Valid @RequestParam(value = "isbn", required = false) String isbn);
+			@ApiParam(value = "book title to be found") @Valid @RequestParam(value = Constants.TITLE, required = false) String title,
+			@ApiParam(value = "author name") @Valid @RequestParam(value = Constants.AUTHOR, required = false) String author,
+			@ApiParam(value = "isbn number") @Valid @RequestParam(value = Constants.ISBN, required = false) String isbn);
 
-	@ApiOperation(value = "Get book by isbn number", nickname = "getBookByIsbn", notes = "", response = Book.class, tags = {
-			"bookstore", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "successful operation", response = Book.class),
-			@ApiResponse(code = 500, message = "Invalid isbn supplied"),
-			@ApiResponse(code = 404, message = "book not found") })
-	@RequestMapping(value = "/book/{isbn}", produces = { "application/json" }, method = RequestMethod.GET)
+	@ApiOperation(value = "Gets book by isbn number", nickname = "getBookByIsbn", notes = "", response = Book.class, tags = {
+			Constants.BOOKSTORE })
+	@ApiResponses(value = { @ApiResponse(code = 200, message = Constants.SUCCESSFUL_OPERATION, response = Book.class),
+			@ApiResponse(code = 500, message = Constants.INVALID_ISBN_PROVIDED),
+			@ApiResponse(code = 404, message = Constants.BOOK_NOT_FOUND) })
+	@RequestMapping(value = "/book/{isbn}", produces = { Constants.APPLICATION_JSON }, method = RequestMethod.GET)
 	ResponseEntity<Book> getBookByIsbn(
-			@ApiParam(value = "The isbn/id number of the book.", required = true) @PathVariable("isbn") String isbn);
+			@ApiParam(value = "The isbn/id number of the book.", required = true) @PathVariable(Constants.ISBN) String isbn);
 
 	@ApiOperation(value = "Fetches media coverage for a book by its title", nickname = "getMediaCoverage", notes = "", response = Book.class, responseContainer = "List", tags = {
-			"bookstore", })
+			Constants.BOOKSTORE })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "successful operation", response = Book.class, responseContainer = "List"),
-			@ApiResponse(code = 500, message = "failed operation") })
-	@RequestMapping(value = "/mediaCoverage", produces = { "application/json" }, method = RequestMethod.GET)
+			@ApiResponse(code = 200, message = Constants.SUCCESSFUL_OPERATION, response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 500, message = Constants.FAILED_OPERATION) })
+	@RequestMapping(value = "/mediaCoverage", produces = { Constants.APPLICATION_JSON }, method = RequestMethod.GET)
 	ResponseEntity<List<String>> getMediaCoverage(
-			@ApiParam(value = "book title") @RequestParam(value = "title", required = true) String booktTitle);
+			@ApiParam(value = "book title") @RequestParam(value = Constants.TITLE, required = true) String booktTitle);
 
-	@ApiOperation(value = "order book", nickname = "orderBook", notes = "order a book", tags = { "bookstore", })
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Invalid book supplied"),
-			@ApiResponse(code = 404, message = "book not found"),
-			@ApiResponse(code = 500, message = "failed operation") })
-	@RequestMapping(value = "/order/{isbn}", produces = { "application/json" }, method = RequestMethod.POST)
-	ResponseEntity<String> orderBook(
-			@ApiParam(value = "isbn of book to be ordered", required = true) @PathVariable("isbn") String isbn,
+	@ApiOperation(value = "orders book", nickname = "orderBook", notes = "order a book", tags = { Constants.BOOKSTORE })
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = Constants.SUCCESSFUL_OPERATION, response = OrderResponse.class),
+			@ApiResponse(code = 404, message = Constants.BOOK_NOT_FOUND),
+			@ApiResponse(code = 500, message = Constants.FAILED_OPERATION) })
+	@RequestMapping(value = "/order/{isbn}", produces = { Constants.APPLICATION_JSON }, method = RequestMethod.POST)
+	ResponseEntity<OrderResponse> orderBook(
+			@ApiParam(value = "isbn of book to be ordered", required = true) @PathVariable(Constants.ISBN) String isbn,
 			@ApiParam(value = "book object to be ordered", required = true) @Valid @RequestBody Book body);
-	
-	@ApiOperation(value = "update book", nickname = "updateBook", notes = "update a book", tags = { "bookstore", })
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "Invalid book isbn"),
-			@ApiResponse(code = 404, message = "book not found"),
-			@ApiResponse(code = 500, message = "failed operation") })
-	@RequestMapping(value = "book/{isbn}", produces = { "application/json" }, method = RequestMethod.PUT)
+
+	@ApiOperation(value = "updates book", nickname = "updateBook", notes = "update a book", tags = {
+			Constants.BOOKSTORE })
+	@ApiResponses(value = { @ApiResponse(code = 404, message = Constants.BOOK_NOT_FOUND),
+			@ApiResponse(code = 400, message = Constants.INVALID_INPUT),
+			@ApiResponse(code = 500, message = Constants.FAILED_OPERATION) })
+	@RequestMapping(value = "book/{isbn}", produces = { Constants.APPLICATION_JSON }, method = RequestMethod.PUT)
 	ResponseEntity<Book> updateBook(
-			@ApiParam(value = "isbn of book", required = true) @PathVariable("isbn") String isbn,
+			@ApiParam(value = "isbn of book", required = true) @PathVariable(Constants.ISBN) String isbn,
 			@ApiParam(value = "book object to be updated", required = true) @Valid @RequestBody BookRequest bookRequest);
 
 }

@@ -6,6 +6,8 @@ import javax.persistence.Id;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * @author himaniagarwal The Class BookQuantity.
  */
@@ -38,6 +40,7 @@ public class BookQuantity {
 		this.quantity = quantity;
 	}
 
+	@JsonIgnore
 	public Integer getVersion() {
 		return version;
 	}

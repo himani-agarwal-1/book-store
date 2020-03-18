@@ -19,7 +19,7 @@ public class BookRequest {
 
 	private Float price = 0f;
 	@NotNull
-	private Integer quantity;
+	private Integer quantity=0;
 	private String language;
 	private String bindingType;
 

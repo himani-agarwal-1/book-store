@@ -28,6 +28,7 @@ import com.nagarro.bookstore.exception.BookStoreException;
 import com.nagarro.bookstore.model.BookRequest;
 import com.nagarro.bookstore.repositories.BookQuantityRepository;
 import com.nagarro.bookstore.repositories.BookRepository;
+import com.nagarro.bookstore.utils.RestClientUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BookServiceTest {
@@ -40,7 +41,7 @@ public class BookServiceTest {
 	private BookQuantityRepository bookQuantityRepository;
 
 	@Mock
-	private RestTemplate restTemplate;
+	private RestClientUtil restClientUtil;
 
 	private Book book;
 
@@ -50,7 +51,6 @@ public class BookServiceTest {
 		book.setTitle("title");
 		book.setIsbn("isbn");
 		book.setAuthor("author");
-		ReflectionTestUtils.setField(bookService, "mediaCoverageURI", "testURI");
 		MockitoAnnotations.initMocks(this);
 	}
 
@@ -93,8 +93,10 @@ public class BookServiceTest {
 	@Test
 	public void testDeleteSuccess() {
 
-		Mockito.doNothing().when(bookRepository).delete(Mockito.any(Book.class));
+		Optional<Book> bookOptional = Optional.of(book);
 		String isbn = "isbn";
+		Mockito.when(bookRepository.findById(isbn)).thenReturn(bookOptional);
+		Mockito.doNothing().when(bookRepository).delete(Mockito.any(Book.class));
 		bookService.delete(isbn);
 	}
 
@@ -138,7 +140,7 @@ public class BookServiceTest {
 		map.put("id", 1);
 		mediaList.add(map);
 		String title = "t";
-		Mockito.when(restTemplate.getForObject(ArgumentMatchers.anyString(), ArgumentMatchers.<Class<List>>any()))
+		Mockito.when(restClientUtil.getAllMediaCoverage())
 				.thenReturn(mediaList);
 		List<String> responses = bookService.getMediaCoverageForBook(title);
 		Assert.assertNotNull(responses);
@@ -185,7 +187,7 @@ public class BookServiceTest {
 		Mockito.when(bookRepository.save(Mockito.any(Book.class))).thenReturn(book);
 		BookQuantity bookQuantity = new BookQuantity();
 		bookQuantity.setIsbn(book.getIsbn());
-		bookQuantity.setQuantity(10);
+		bookQuantity.setQuantity(11);
 		Mockito.when(bookQuantityRepository.findById(Mockito.anyString())).thenReturn(Optional.of(bookQuantity));
 		Mockito.when(bookQuantityRepository.save(Mockito.any(BookQuantity.class))).thenReturn(bookQuantity);
 

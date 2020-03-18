@@ -1,7 +1,6 @@
 package com.nagarro.bookstore.services;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.nagarro.bookstore.constant.Constants;
 import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.entity.BookQuantity;
 import com.nagarro.bookstore.exception.BookStoreException;
@@ -23,6 +22,7 @@ import com.nagarro.bookstore.model.BookRequest;
 import com.nagarro.bookstore.model.ResponseMessage;
 import com.nagarro.bookstore.repositories.BookQuantityRepository;
 import com.nagarro.bookstore.repositories.BookRepository;
+import com.nagarro.bookstore.utils.RestClientUtil;
 
 /**
  * @author himaniagarwal Implements CRUD and order operations for book store
@@ -31,7 +31,7 @@ import com.nagarro.bookstore.repositories.BookRepository;
 @Service
 public class BookServiceImpl implements BookService {
 
-	Logger LOGGER = LoggerFactory.getLogger(BookServiceImpl.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(BookServiceImpl.class);
 
 	@Autowired
 	private BookRepository bookRepository;
@@ -40,14 +40,7 @@ public class BookServiceImpl implements BookService {
 	private BookQuantityRepository bookQuantityRepository;
 
 	@Autowired
-	RestTemplate restTemplate;
-
-	/**
-	 * reads property media.coverage.uri from application.properties evaluates
-	 * tohttps://jsonplaceholder.typicode.com/posts
-	 */
-	@Value(value = "${media.coverage.uri}")
-	private String mediaCoverageURI;
+	private RestClientUtil restClientUtil;
 
 	/*
 	 * (non-Javadoc)
@@ -57,22 +50,23 @@ public class BookServiceImpl implements BookService {
 	 * model.BookRequest)
 	 */
 	@Override
+	@Transactional
 	public Book add(BookRequest bookRequest) {
 
-		LOGGER.debug("request for add operaration received for title" + bookRequest.getTitle());
+		LOGGER.debug("request for add operaration received for title {}", bookRequest.getTitle());
 		Book book = new Book();
 		BeanUtils.copyProperties(bookRequest, book);
 		List<Book> books = bookRepository.findByTitleIgnoreCase(book.getTitle());
 		if (books != null && books.size() > 0) {
-			throw new BookStoreException(
-					new ResponseMessage(" book with same name already exist", "title.already.exist"));
+			throw new BookStoreException(new ResponseMessage(Constants.BOOK_ALREADY_EXIST, "title.already.exist"));
 		}
 		book = bookRepository.save(book);
 
 		BookQuantity bookQuantity = new BookQuantity();
 		bookQuantity.setQuantity(bookRequest.getQuantity());
 		bookQuantity.setIsbn(book.getIsbn());
-		LOGGER.debug("book saved successfully" + bookRequest.getTitle());
+		book.setBookQuantity(bookQuantity);
+		LOGGER.info("book saved successfully {}", bookRequest.getTitle());
 		bookQuantityRepository.save(bookQuantity);
 
 		return book;
@@ -85,9 +79,14 @@ public class BookServiceImpl implements BookService {
 	 */
 	@Override
 	public void delete(String isbn) {
-		Book book = new Book();
-		book.setIsbn(isbn);
-		bookRepository.delete(book);
+		LOGGER.debug("deleting book with isbn {}", isbn);
+		Optional<Book> findById = bookRepository.findById(isbn);
+		if (findById.isPresent()) {
+			Book book = findById.get();
+			book.setIsbn(isbn);
+			bookRepository.delete(book);
+		}
+		
 	}
 
 	/*
@@ -100,10 +99,10 @@ public class BookServiceImpl implements BookService {
 	@Override
 	public List<Book> findByQuery(String author, String isbn, String title) {
 
-		LOGGER.debug("input args are : author %s , isbn %s , title %s", author, isbn, title);
-		author = StringUtils.isBlank(author) ? "" : author;
-		isbn = StringUtils.isBlank(isbn) ? "" : isbn;
-		title = StringUtils.isBlank(title) ? "" : title;
+		LOGGER.debug("input args are : author {} , isbn {} , title {}", author, isbn, title);
+		author = StringUtils.isBlank(author) ? Constants.EMPTY_STRING : author;
+		isbn = StringUtils.isBlank(isbn) ? Constants.EMPTY_STRING : isbn;
+		title = StringUtils.isBlank(title) ? Constants.EMPTY_STRING : title;
 		return bookRepository.findByTitleContainingAndAuthorContainingAndIsbnContaining(title, author, isbn);
 	}
 
@@ -114,25 +113,20 @@ public class BookServiceImpl implements BookService {
 	 * com.nagarro.bookstore.services.BookService#getMediaCoverageForBook(java.
 	 * lang.String)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getMediaCoverageForBook(String title) {
 
-		LOGGER.debug("fetching media coverage for title " + title);
-		List<Map<String, Object>> reponses = (List<Map<String, Object>>) restTemplate.getForObject(mediaCoverageURI,
-				List.class);
-
-		if (null == reponses) {
-			return new ArrayList<String>(0);
-		}
+		LOGGER.debug("fetching media coverage for title {}", title);
+		List<Map<String, Object>> reponses = restClientUtil.getAllMediaCoverage();
 		/*
 		 * 1. filters list based on criteria - book title contained in either
 		 * body or title of media report. 2. maps the list of objects into list
 		 * of string ( string being the media title)
 		 */
 		return reponses.stream().filter(x -> {
-			return x.get("body").toString().contains(title) || x.get("title").toString().contains(title);
-		}).map(x -> x.get("title").toString()).collect(Collectors.toList());
+			return x.get(Constants.BODY).toString().contains(title)
+					|| x.get(Constants.TITLE).toString().contains(title);
+		}).map(x -> x.get(Constants.TITLE).toString()).collect(Collectors.toList());
 
 	}
 
@@ -156,23 +150,15 @@ public class BookServiceImpl implements BookService {
 	 * String)
 	 */
 	@Override
+	@Transactional
 	public void updateBookQuantity(String isbn) {
 
-		LOGGER.info("just after update query for isbn " + isbn + "  ...  " + Thread.currentThread().getId());
-		try {
-			LOGGER.info("threadname on hold= " + isbn + "  ...  " + Thread.currentThread().getId());
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		LOGGER.info("threadname resumed = " + isbn + "  ...  " + Thread.currentThread().getId());
 		Optional<BookQuantity> bookQuantityOptional = bookQuantityRepository.findById(isbn);
 		if (bookQuantityOptional.isPresent()) {
 			BookQuantity currentBookQuantity = bookQuantityOptional.get();
 			if (currentBookQuantity.getQuantity() > 0) {
 				Integer updatedQuantity = currentBookQuantity.getQuantity() - 1;
-				LOGGER.info("currentBookQuantity.getQuantity() = " + currentBookQuantity.getQuantity());
+				LOGGER.info("currentBookQuantity.getQuantity() = {}", currentBookQuantity.getQuantity());
 				currentBookQuantity.setQuantity(updatedQuantity);
 				bookQuantityRepository.save(currentBookQuantity);
 			} else {
@@ -192,18 +178,19 @@ public class BookServiceImpl implements BookService {
 	 * model.BookRequest, com.nagarro.bookstore.entity.Book)
 	 */
 	@Override
+	@Transactional
 	public Book update(BookRequest bookRequest, Book book) {
 
 		BeanUtils.copyProperties(bookRequest, book);
 		book = bookRepository.save(book);
 
 		Optional<BookQuantity> bookQuanityOptional = bookQuantityRepository.findById(book.getIsbn());
-		if (bookQuanityOptional.isPresent()) {
+		if (bookQuanityOptional.isPresent() && bookQuanityOptional.get().getQuantity() != bookRequest.getQuantity()) {
 			BookQuantity bookQuantity = bookQuanityOptional.get();
 			bookQuantity.setQuantity(bookRequest.getQuantity());
 			bookQuantityRepository.save(bookQuantity);
-			LOGGER.info("Book quantity updated for isbn : " + book.getIsbn() + " updated quantity :   "
-					+ bookQuantity.getQuantity());
+			LOGGER.info("Book quantity updated for isbn : {} updated quantity :   {}", book.getIsbn(),
+					+bookQuantity.getQuantity());
 		}
 		return book;
 	}

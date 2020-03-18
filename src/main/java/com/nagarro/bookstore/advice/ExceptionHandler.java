@@ -1,5 +1,8 @@
 package com.nagarro.bookstore.advice;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -23,14 +26,16 @@ public class ExceptionHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExceptionHandler.class);
 
-	
 	@org.springframework.web.bind.annotation.ExceptionHandler(ObjectOptimisticLockingFailureException.class)
 	public ResponseEntity<ResponseMessage> handleObjectOptimisticLockingFailureException(HttpServletRequest request,
 			ObjectOptimisticLockingFailureException ex) {
-		logger.error("ObjectOptimisticLockingFailureException exception occured " + request.getRequestURI(), ex);
-		ResponseMessage responseMessage = new ResponseMessage("Operation failed due to conflict with concurrent operations. Please try again after sometime. ", HttpStatus.INTERNAL_SERVER_ERROR.name());
+		logger.error("ObjectOptimisticLockingFailureException exception occured {}", request.getRequestURI(), ex);
+		ResponseMessage responseMessage = new ResponseMessage(
+				"Operation failed due to conflict with concurrent operations. Please try again after sometime. ",
+				HttpStatus.INTERNAL_SERVER_ERROR.name());
 		return new ResponseEntity<ResponseMessage>(responseMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+
 	/**
 	 * Handles MethodArgumentNotValidException
 	 *
@@ -43,8 +48,13 @@ public class ExceptionHandler {
 	@org.springframework.web.bind.annotation.ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ResponseMessage> handleMethodArgumentNotValidException(HttpServletRequest request,
 			MethodArgumentNotValidException ex) {
-		logger.error("MethodArgumentNotValidException exception occured " + request.getRequestURI(), ex);
-		ResponseMessage responseMessage = new ResponseMessage(ex.getMessage(), HttpStatus.BAD_REQUEST.name());
+
+		List<String> errorMessages = ex.getBindingResult().getFieldErrors().stream().map(error -> {
+			return String.join(" ", error.getField(), error.getDefaultMessage());
+		}).collect(Collectors.toList());
+		String message = String.join(", ", errorMessages);
+		logger.error("MethodArgumentNotValidException exception occured at {} with message : {}" , request.getRequestURI(), message, ex);
+		ResponseMessage responseMessage = new ResponseMessage(message, HttpStatus.BAD_REQUEST.name());
 		return new ResponseEntity<ResponseMessage>(responseMessage, HttpStatus.BAD_REQUEST);
 	}
 
@@ -60,7 +70,7 @@ public class ExceptionHandler {
 	@org.springframework.web.bind.annotation.ExceptionHandler(RestClientException.class)
 	public ResponseEntity<ResponseMessage> handleRestClientException(HttpServletRequest request,
 			RestClientException ex) {
-		logger.error("RestClientException exception occured " + request.getRequestURI(), ex);
+		logger.error("RestClientException exception occured {}" , request.getRequestURI(), ex);
 		ResponseMessage responseMessage = new ResponseMessage(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.name());
 		return new ResponseEntity<ResponseMessage>(responseMessage, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -76,7 +86,7 @@ public class ExceptionHandler {
 	 */
 	@org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
 	public ResponseEntity<ResponseMessage> handleException(HttpServletRequest request, Exception ex) {
-		logger.error("exception occured " + request.getRequestURI(), ex);
+		logger.error("exception occured {}", request.getRequestURI(), ex);
 		ResponseMessage responseMessage = null;
 
 		if (ex instanceof BookStoreException) {
