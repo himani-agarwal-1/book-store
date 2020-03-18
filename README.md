@@ -11,12 +11,10 @@ To implement Rest API, following have been used :
 ![](images/erdiagram.png)
 
 # STEPS TO RUN APPLICATION WITH DOCKER
-1. On the project base directory, run following commands : 
+1. On the project base directory, run following command : 
+
 ````
-mvn clean install
-````
-````
-docker-compose up
+docker-compose up --build
 ````
 It will run the following 2 services : 
 1. docker-mysql : A container running MySql server available on 3306
