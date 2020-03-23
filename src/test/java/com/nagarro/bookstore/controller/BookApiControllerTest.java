@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nagarro.bookstore.controller.BookApiController;
 import com.nagarro.bookstore.entity.Book;
 import com.nagarro.bookstore.exception.BookStoreException;
 import com.nagarro.bookstore.model.BookRequest;
@@ -31,8 +30,7 @@ import com.nagarro.bookstore.services.BookService;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = BookApiController.class)
 @ActiveProfiles("test")
-
-@TestPropertySource(properties = { "logging.file.path", "test" })
+@TestPropertySource(properties = { "logging.level.org.springframework", "DEBUG" })
 public class BookApiControllerTest {
 
 	@Autowired
@@ -187,6 +185,178 @@ public class BookApiControllerTest {
 				    .andExpect(MockMvcResultMatchers.status().isOk());
 				    
 	  }
+	
+	@Test
+	  public void testGetByISBNNotFound() throws Exception{
+		String isbn = "isbn";
+	
+			  Book book = new Book();
+		String title = "title";
+		book.setTitle(title);
+		book.setIsbn(isbn);
+		String author = "author";
+		book.setAuthor(author);
+
+		Mockito.when(bookService.getByISBN(isbn)).thenReturn(Optional.empty() );
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.get("/bookstore/book/{isbn}", isbn);
+				mockMvc.perform(request)
+				    .andExpect(MockMvcResultMatchers.status().isNotFound());
+				    
+	  }
 	  
+	@Test
+	  public void testOrderBookSucess() throws Exception{
+	  Book book = new Book();
+		book.setTitle("title");
+		book.setIsbn("isbn");
+		book.setAuthor("author");
+		
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setTitle("title");
+		bookRequest.setQuantity(10);
+		bookRequest.setAuthor("author");
+		bookRequest.setPublishedBy("publishedBy");
+		
+		String isbn = "isbn";
+		Optional<Book> bookOpt= Optional.of(book);
+		Mockito.when(bookService.getByISBN(Mockito.anyString())).thenReturn(bookOpt);
+		Mockito.doNothing().when(bookService).updateBookQuantity(Mockito.anyString() );
+		
+		  String jsonpayload = objectMapper.writeValueAsString(book);
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post("/bookstore/order/{isbn}", isbn)
+				    .contentType("application/json").content(jsonpayload)  ;
+		mockMvc.perform(request)
+				    .andExpect(MockMvcResultMatchers.status().isOk());
+				    
+	  }
+	
+	@Test
+	  public void testOrderBookNotFound() throws Exception{
+	  Book book = new Book();
+		book.setTitle("title");
+		book.setIsbn("isbn");
+		book.setAuthor("author");
+		
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setTitle("title");
+		bookRequest.setQuantity(10);
+		bookRequest.setAuthor("author");
+		bookRequest.setPublishedBy("publishedBy");
+		
+		String isbn = "isbn";
+		Optional<Book> bookOpt= Optional.empty();
+		Mockito.when(bookService.getByISBN(Mockito.anyString())).thenReturn(bookOpt);
+		Mockito.doNothing().when(bookService).updateBookQuantity(Mockito.anyString() );
+		
+		  String jsonpayload = objectMapper.writeValueAsString(book);
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post("/bookstore/order/{isbn}", isbn)
+				    .contentType("application/json").content(jsonpayload)  ;
+		mockMvc.perform(request)
+				    .andExpect(MockMvcResultMatchers.status().isNotFound());
+				    
+	  }
 	 
+	@Test
+	  public void testOrderBookInvaidInput() throws Exception{
+	  Book book = new Book();
+		book.setTitle("title");
+		book.setIsbn("isbn");
+		book.setAuthor("author");
+		
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setQuantity(10);
+		bookRequest.setAuthor("author");
+		bookRequest.setPublishedBy("publishedBy");
+		
+		String isbn = "isbn";
+		Optional<Book> bookOpt= Optional.of(book);
+		Mockito.when(bookService.getByISBN(Mockito.anyString())).thenReturn(bookOpt);
+		Mockito.doNothing().when(bookService).updateBookQuantity(Mockito.anyString() );
+		
+		  String jsonpayload = objectMapper.writeValueAsString(bookRequest);
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post("/bookstore/order/{isbn}", isbn)
+				    .contentType("application/json").content(jsonpayload)  ;
+		mockMvc.perform(request)
+				    .andExpect(MockMvcResultMatchers.status().isBadRequest());
+				    
+	  }
+	
+	@Test
+	  public void testUpdateBookSucess() throws Exception{
+	  Book book = new Book();
+		book.setTitle("title");
+		book.setIsbn("isbn");
+		book.setAuthor("author");
+		
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setTitle("title");
+		bookRequest.setQuantity(10);
+		bookRequest.setAuthor("author");
+		bookRequest.setPublishedBy("publishedBy");
+		
+		String isbn = "isbn";
+		Optional<Book> bookOpt= Optional.of(book);
+		Mockito.when(bookService.getByISBN(Mockito.anyString())).thenReturn(bookOpt);
+		Mockito.doNothing().when(bookService).updateBookQuantity(Mockito.anyString() );
+		
+		  String jsonpayload = objectMapper.writeValueAsString(bookRequest);
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put("/bookstore/book/{isbn}", isbn)
+				    .contentType("application/json").content(jsonpayload)  ;
+		mockMvc.perform(request)
+				    .andExpect(MockMvcResultMatchers.status().isOk());
+				    
+	  }
+	 
+	@Test
+	  public void testUpdateBookInvaidInput() throws Exception{
+	  Book book = new Book();
+		book.setTitle("title");
+		book.setIsbn("isbn");
+		book.setAuthor("author");
+		
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setQuantity(10);
+		bookRequest.setAuthor("author");
+		bookRequest.setPublishedBy("publishedBy");
+		
+		String isbn = "isbn";
+		Optional<Book> bookOpt= Optional.of(book);
+		Mockito.when(bookService.getByISBN(Mockito.anyString())).thenReturn(bookOpt);
+		Mockito.doNothing().when(bookService).updateBookQuantity(Mockito.anyString() );
+		
+		  String jsonpayload = objectMapper.writeValueAsString(bookRequest);
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put("/bookstore/book/{isbn}", isbn)
+				    .contentType("application/json").content(jsonpayload)  ;
+		mockMvc.perform(request)
+				    .andExpect(MockMvcResultMatchers.status().isBadRequest());
+				    
+	  }
+	
+	@Test
+	  public void testUpdateBookNotFound() throws Exception{
+	  Book book = new Book();
+		book.setTitle("title");
+		book.setIsbn("isbn");
+		book.setAuthor("author");
+		
+		BookRequest bookRequest = new BookRequest();
+		bookRequest.setQuantity(10);
+		bookRequest.setTitle("title");
+		bookRequest.setAuthor("author");
+		bookRequest.setPublishedBy("publishedBy");
+		
+		String isbn = "isbn";
+		Optional<Book> bookOpt= Optional.empty();
+		Mockito.when(bookService.getByISBN(Mockito.anyString())).thenReturn(bookOpt);
+		Mockito.doNothing().when(bookService).updateBookQuantity(Mockito.anyString() );
+		
+		  String jsonpayload = objectMapper.writeValueAsString(bookRequest);
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.put("/bookstore/book/{isbn}", isbn)
+				    .contentType("application/json").content(jsonpayload)  ;
+		mockMvc.perform(request)
+				    .andExpect(MockMvcResultMatchers.status().isNotFound());
+				    
+	  }
+	
 }
